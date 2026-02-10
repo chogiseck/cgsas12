@@ -26,6 +26,12 @@ if (!PROJECT_ID && !PROJECT_NUMBER) {
 const SearchArgumentsSchema = z.object({
   query: z.string().min(2),
   category: z.enum(["elementary_edu", "pottery", "zettelkasten", "obsidian"]),
+  pageSize: z.number().min(1).max(100).optional().default(5),
+  enableQueryExpansion: z.boolean().optional().default(true),
+  returnSnippet: z.boolean().optional().default(true),
+  maxExtractiveAnswerCount: z.number().min(0).max(5).optional().default(1),
+  summaryResultCount: z.number().min(1).max(10).optional().default(5),
+  includeCitations: z.boolean().optional().default(true),
 });
 
 const CreateNotebookSchema = z.object({
@@ -89,15 +95,39 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     {
       name: "search_knowledge_base",
       description:
-        "초등교육, 도예, 제텔카스텐 등 전문 지식 베이스에서 정보를 검색합니다.",
+        "초등교육, 도예, 제텔카스텐, 옵시디언 등 전문 지식 베이스에서 정보를 검색합니다. 스니펫, 추출 답변, AI 요약을 포함한 결과를 반환합니다.",
       inputSchema: {
         type: "object" as const,
         properties: {
-          query: { type: "string", description: "검색어" },
+          query: { type: "string", description: "검색어 (최소 2자)" },
           category: {
             type: "string",
             enum: ["elementary_edu", "pottery", "zettelkasten", "obsidian"],
             description: "지식 카테고리",
+          },
+          pageSize: {
+            type: "number",
+            description: "반환할 검색 결과 수 (기본값: 5, 최대: 100)",
+          },
+          enableQueryExpansion: {
+            type: "boolean",
+            description: "쿼리 자동 확장 활성화 (기본값: true)",
+          },
+          returnSnippet: {
+            type: "boolean",
+            description: "검색 결과에 스니펫 포함 (기본값: true)",
+          },
+          maxExtractiveAnswerCount: {
+            type: "number",
+            description: "추출 답변 최대 개수 (기본값: 1, 최대: 5)",
+          },
+          summaryResultCount: {
+            type: "number",
+            description: "요약에 포함할 결과 수 (기본값: 5, 최대: 10)",
+          },
+          includeCitations: {
+            type: "boolean",
+            description: "요약에 인용 포함 여부 (기본값: true)",
           },
         },
         required: ["query", "category"],
@@ -242,11 +272,36 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     switch (name) {
       // ── 검색 ──
       case "search_knowledge_base": {
-        const { query, category } = SearchArgumentsSchema.parse(args);
+        const {
+          query,
+          category,
+          pageSize,
+          enableQueryExpansion,
+          returnSnippet,
+          maxExtractiveAnswerCount,
+          summaryResultCount,
+          includeCitations,
+        } = SearchArgumentsSchema.parse(args);
         const projectId = PROJECT_ID ?? PROJECT_NUMBER;
         const [response] = await discoveryClient.search({
           servingConfig: `projects/${projectId}/locations/global/collections/default_collection/dataStores/${category}_ds/servingConfigs/default_search`,
           query,
+          pageSize,
+          queryExpansionSpec: {
+            condition: enableQueryExpansion ? "AUTO" : "DISABLED",
+          },
+          contentSearchSpec: {
+            snippetSpec: {
+              returnSnippet,
+            },
+            extractiveContentSpec: {
+              maxExtractiveAnswerCount,
+            },
+            summarySpec: {
+              summaryResultCount,
+              includeCitations,
+            },
+          },
         });
         return {
           content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
