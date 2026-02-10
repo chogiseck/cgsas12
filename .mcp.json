@@ -4,7 +4,11 @@
       "command": "npx",
       "args": [
         "notebooklm-mcp@latest"
-      ]
+      ],
+      "env": {
+        "NOTEBOOKLM_PROFILE": "minimal",
+        "NOTEBOOKLM_DISABLED_TOOLS": "cleanup_data,re_auth,remove_notebook"
+      }
     }
   }
 }
