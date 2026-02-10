@@ -1,0 +1,31 @@
+{
+  "name": "notebooklm-mcp-server",
+  "version": "1.0.0",
+  "description": "Google NotebookLM Enterprise API와 연동하는 MCP 서버",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "notebooklm-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "notebooklm",
+    "google-cloud",
+    "model-context-protocol"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "google-auth-library": "^9.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
