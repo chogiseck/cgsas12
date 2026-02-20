@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Flask / SQLite
+instance/
+*.db
+*.sqlite3
+
+# 업로드/썸네일 (런타임 생성 파일)
+static/uploads/
+static/thumbnails/
+
+# 가상환경
+venv/
+.venv/
+env/
+
+# 에디터
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
