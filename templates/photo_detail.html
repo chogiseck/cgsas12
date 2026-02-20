@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}{{ photo.original_name }} — 사진 정리 앱{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+  <!-- 네비게이션 바 -->
+  <div class="detail-nav">
+    <a href="{{ url_for('index') }}" class="btn btn-ghost">← 갤러리로</a>
+    <div class="detail-nav-arrows">
+      {% if prev_photo %}
+        <a href="{{ url_for('photo_detail', photo_id=prev_photo.id) }}" class="btn btn-ghost">‹ 이전</a>
+      {% endif %}
+      {% if next_photo %}
+        <a href="{{ url_for('photo_detail', photo_id=next_photo.id) }}" class="btn btn-ghost">다음 ›</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="detail-layout">
+    <!-- 이미지 뷰어 -->
+    <div class="image-viewer">
+      <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}"
+           alt="{{ photo.original_name }}"
+           class="detail-image"
+           id="mainImage">
+    </div>
+
+    <!-- 사이드 패널 -->
+    <aside class="detail-panel">
+      <h2 class="detail-title">{{ photo.original_name }}</h2>
+
+      <!-- 메타데이터 -->
+      <div class="meta-section">
+        <h3 class="meta-title">정보</h3>
+        <dl class="meta-list">
+          {% if photo.taken_at %}
+          <dt>촬영 일시</dt>
+          <dd>{{ photo.taken_at.strftime('%Y년 %m월 %d일 %H:%M') }}</dd>
+          {% endif %}
+
+          {% if photo.camera_make or photo.camera_model %}
+          <dt>카메라</dt>
+          <dd>{{ photo.camera_make or '' }} {{ photo.camera_model or '' }}</dd>
+          {% endif %}
+
+          {% if photo.width and photo.height %}
+          <dt>해상도</dt>
+          <dd>{{ photo.width }} × {{ photo.height }}</dd>
+          {% endif %}
+
+          {% if photo.file_size %}
+          <dt>파일 크기</dt>
+          <dd>{{ '%.1f'|format(photo.file_size / 1024 / 1024) }} MB</dd>
+          {% endif %}
+
+          {% if photo.latitude and photo.longitude %}
+          <dt>위치</dt>
+          <dd>
+            <a href="https://maps.google.com/?q={{ photo.latitude }},{{ photo.longitude }}"
+               target="_blank" rel="noopener">
+              {{ '%.4f'|format(photo.latitude) }}, {{ '%.4f'|format(photo.longitude) }}
+            </a>
+          </dd>
+          {% endif %}
+
+          <dt>업로드</dt>
+          <dd>{{ photo.uploaded_at.strftime('%Y년 %m월 %d일') }}</dd>
+        </dl>
+      </div>
+
+      <!-- 태그 -->
+      <div class="meta-section">
+        <h3 class="meta-title">태그</h3>
+        <div class="tag-cloud">
+          {% for tag in photo.tags %}
+            <a href="{{ url_for('index', tag=tag.name) }}" class="tag">
+              #{{ tag.name }}
+            </a>
+          {% else %}
+            <span class="text-muted">태그 없음</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- 앨범 -->
+      {% if photo.albums %}
+      <div class="meta-section">
+        <h3 class="meta-title">앨범</h3>
+        <ul class="album-list">
+          {% for album in photo.albums %}
+          <li>
+            <a href="{{ url_for('album_detail', album_id=album.id) }}">{{ album.name }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- 편집 폼 -->
+      <details class="edit-section">
+        <summary class="btn btn-secondary" style="cursor:pointer; display:inline-block;">편집</summary>
+        <form action="{{ url_for('edit_photo', photo_id=photo.id) }}" method="post" class="edit-form">
+          <div class="form-group">
+            <label>설명</label>
+            <textarea name="description" rows="3" placeholder="사진 설명...">{{ photo.description or '' }}</textarea>
+          </div>
+          <div class="form-group">
+            <label>태그 (쉼표로 구분)</label>
+            <input type="text" name="tags"
+                   value="{{ photo.tags|map(attribute='name')|join(', ') }}">
+          </div>
+          <div class="form-group">
+            <label>앨범</label>
+            <select name="albums" multiple>
+              {% for album in all_albums %}
+              <option value="{{ album.id }}"
+                {% if album in photo.albums %}selected{% endif %}>
+                {{ album.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">저장</button>
+        </form>
+      </details>
+
+      <!-- 삭제 -->
+      <div class="danger-zone">
+        <form action="{{ url_for('delete_photo', photo_id=photo.id) }}" method="post"
+              onsubmit="return confirm('이 사진을 삭제하시겠습니까?')">
+          <button type="submit" class="btn btn-danger">사진 삭제</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

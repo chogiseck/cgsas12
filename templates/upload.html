@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}사진 업로드 — 사진 정리 앱{% endblock %}
+
+{% block content %}
+<div class="upload-page">
+  <div class="upload-container">
+    <h1 class="page-title">사진 업로드</h1>
+
+    <form id="uploadForm" action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+      <!-- 드래그 앤 드롭 영역 -->
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" name="photos" multiple
+               accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.tiff,.heic" hidden>
+        <div class="drop-zone-content">
+          <div class="drop-icon">🖼️</div>
+          <p class="drop-text">사진을 여기에 끌어다 놓거나</p>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+            파일 선택
+          </button>
+          <p class="drop-hint">JPG, PNG, GIF, BMP, WebP, TIFF, HEIC · 최대 50MB</p>
+        </div>
+      </div>
+
+      <!-- 선택된 파일 미리보기 -->
+      <div id="previewGrid" class="preview-grid" hidden></div>
+
+      <!-- 추가 정보 -->
+      <div class="upload-meta">
+        <div class="form-group">
+          <label for="albumSelect">앨범 추가 (선택)</label>
+          <select id="albumSelect" name="album_id">
+            <option value="">앨범 선택 안함</option>
+            {% for album in albums %}
+            <option value="{{ album.id }}">{{ album.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tagsInput">태그 (선택)</label>
+          <input type="text" id="tagsInput" name="tags"
+                 placeholder="여행, 가족, 2024 (쉼표로 구분)">
+          <small>쉼표(,)로 여러 태그를 입력할 수 있습니다.</small>
+        </div>
+      </div>
+
+      <div class="upload-actions">
+        <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+          업로드
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const dropZone   = document.getElementById('dropZone');
+const fileInput  = document.getElementById('fileInput');
+const previewGrid= document.getElementById('previewGrid');
+const submitBtn  = document.getElementById('submitBtn');
+
+let selectedFiles = new DataTransfer();
+
+function addFiles(files) {
+  [...files].forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    selectedFiles.items.add(file);
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const card = document.createElement('div');
+      card.className = 'preview-card';
+      card.innerHTML = `
+        <img src="${e.target.result}" alt="${file.name}">
+        <div class="preview-info">
+          <span class="preview-name">${file.name}</span>
+          <span class="preview-size">${(file.size/1024/1024).toFixed(1)} MB</span>
+        </div>
+      `;
+      previewGrid.appendChild(card);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  fileInput.files = selectedFiles.files;
+  updateUI();
+}
+
+function updateUI() {
+  const hasFiles = selectedFiles.files.length > 0;
+  previewGrid.hidden = !hasFiles;
+  submitBtn.disabled = !hasFiles;
+  submitBtn.textContent = hasFiles
+    ? `${selectedFiles.files.length}장 업로드`
+    : '업로드';
+}
+
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  addFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', () => addFiles(fileInput.files));
+</script>
+{% endblock %}

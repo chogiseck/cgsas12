@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}앨범 — 사진 정리 앱{% endblock %}
+
+{% block content %}
+<div class="albums-page">
+  <div class="page-header">
+    <h1 class="page-title">앨범</h1>
+    <button class="btn btn-primary" onclick="document.getElementById('newAlbumModal').showModal()">
+      + 새 앨범
+    </button>
+  </div>
+
+  {% if albums %}
+  <div class="album-grid">
+    {% for album in albums %}
+    <div class="album-card">
+      <a href="{{ url_for('album_detail', album_id=album.id) }}" class="album-link">
+        <div class="album-cover">
+          {% if album.cover_photo %}
+            <img src="{{ url_for('static', filename='thumbnails/' + album.cover_photo.thumbnail_path) }}"
+                 alt="{{ album.name }}"
+                 onerror="this.parentElement.innerHTML='<div class=album-cover-empty>📁</div>'">
+          {% else %}
+            <div class="album-cover-empty">📁</div>
+          {% endif %}
+        </div>
+        <div class="album-info">
+          <h3 class="album-name">{{ album.name }}</h3>
+          <span class="album-count">{{ album.photos|length }}장</span>
+          {% if album.description %}
+          <p class="album-desc">{{ album.description }}</p>
+          {% endif %}
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📁</div>
+    <h3>앨범이 없습니다</h3>
+    <p>새 앨범을 만들어 사진을 정리해보세요.</p>
+    <button class="btn btn-primary" onclick="document.getElementById('newAlbumModal').showModal()">
+      새 앨범 만들기
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- 새 앨범 모달 -->
+<dialog id="newAlbumModal" class="modal">
+  <div class="modal-content">
+    <h2 class="modal-title">새 앨범 만들기</h2>
+    <form action="{{ url_for('new_album') }}" method="post">
+      <div class="form-group">
+        <label for="albumName">앨범 이름 <span class="required">*</span></label>
+        <input type="text" id="albumName" name="name" required
+               placeholder="앨범 이름을 입력하세요">
+      </div>
+      <div class="form-group">
+        <label for="albumDesc">설명 (선택)</label>
+        <textarea id="albumDesc" name="description" rows="3"
+                  placeholder="앨범 설명..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary"
+                onclick="document.getElementById('newAlbumModal').close()">취소</button>
+        <button type="submit" class="btn btn-primary">만들기</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+{% endblock %}

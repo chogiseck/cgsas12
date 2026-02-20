@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}갤러리 — 사진 정리 앱{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+  <!-- 사이드바 -->
+  <aside class="sidebar">
+    <!-- 검색 -->
+    <form class="search-form" action="{{ url_for('index') }}" method="get">
+      <input type="hidden" name="sort" value="{{ sort }}">
+      <div class="search-box">
+        <input type="text" name="q" value="{{ query }}" placeholder="사진 검색...">
+        <button type="submit" class="search-btn">🔍</button>
+      </div>
+    </form>
+
+    <!-- 통계 -->
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">통계</h3>
+      <div class="stats" id="stats">
+        <div class="stat-item">
+          <span class="stat-value">{{ photos|length }}</span>
+          <span class="stat-label">사진</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ albums|length }}</span>
+          <span class="stat-label">앨범</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ tags|length }}</span>
+          <span class="stat-label">태그</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 연도 필터 -->
+    {% if years %}
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">연도</h3>
+      <ul class="filter-list">
+        <li>
+          <a href="{{ url_for('index', sort=sort, q=query, tag=selected_tag) }}"
+             class="filter-item {% if not selected_year %}active{% endif %}">
+            전체
+          </a>
+        </li>
+        {% for year in years %}
+        <li>
+          <a href="{{ url_for('index', sort=sort, q=query, tag=selected_tag, year=year) }}"
+             class="filter-item {% if selected_year == year|string %}active{% endif %}">
+            {{ year }}년
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- 태그 필터 -->
+    {% if tags %}
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">태그</h3>
+      <div class="tag-cloud">
+        <a href="{{ url_for('index', sort=sort, q=query) }}"
+           class="tag {% if not selected_tag %}tag-active{% endif %}">전체</a>
+        {% for tag in tags %}
+        <a href="{{ url_for('index', sort=sort, q=query, tag=tag.name) }}"
+           class="tag {% if selected_tag == tag.name %}tag-active{% endif %}">
+          {{ tag.name }} ({{ tag.photos|length }})
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </aside>
+
+  <!-- 갤러리 영역 -->
+  <section class="gallery-section">
+    <!-- 툴바 -->
+    <div class="gallery-toolbar">
+      <div class="toolbar-left">
+        <h2 class="gallery-title">
+          {% if query %}
+            "{{ query }}" 검색 결과
+          {% elif selected_tag %}
+            #{{ selected_tag }}
+          {% elif selected_year %}
+            {{ selected_year }}년
+          {% else %}
+            전체 사진
+          {% endif %}
+          <span class="count">({{ photos|length }}장)</span>
+        </h2>
+      </div>
+      <div class="toolbar-right">
+        <!-- 정렬 -->
+        <div class="sort-group">
+          <a href="{{ url_for('index', sort='date', q=query, tag=selected_tag, year=selected_year) }}"
+             class="sort-btn {% if sort == 'date' %}active{% endif %}">날짜순</a>
+          <a href="{{ url_for('index', sort='name', q=query, tag=selected_tag, year=selected_year) }}"
+             class="sort-btn {% if sort == 'name' %}active{% endif %}">이름순</a>
+          <a href="{{ url_for('index', sort='size', q=query, tag=selected_tag, year=selected_year) }}"
+             class="sort-btn {% if sort == 'size' %}active{% endif %}">크기순</a>
+        </div>
+        <!-- 뷰 모드 -->
+        <div class="view-toggle">
+          <button id="gridViewBtn" class="view-btn active" title="그리드 뷰">⊞</button>
+          <button id="listViewBtn" class="view-btn" title="리스트 뷰">☰</button>
+        </div>
+      </div>
+    </div>
+
+    {% if photos %}
+      <!-- 날짜별 그룹 (날짜순 정렬 시) -->
+      {% if sort == 'date' %}
+        {% set ns = namespace(current_group='') %}
+        {% for photo in photos %}
+          {% set group = photo.year_month %}
+          {% if group != ns.current_group %}
+            {% if ns.current_group %}
+              </div><!-- /.photo-group-grid -->
+            {% endif %}
+            {% set ns.current_group = group %}
+            <div class="group-header">{{ group }}</div>
+            <div class="photo-grid" id="photoGrid">
+          {% endif %}
+          <div class="photo-card" data-id="{{ photo.id }}">
+            <a href="{{ url_for('photo_detail', photo_id=photo.id) }}" class="photo-link">
+              <div class="photo-thumb-wrap">
+                <img src="{{ url_for('static', filename='thumbnails/' + photo.thumbnail_path) }}"
+                     alt="{{ photo.original_name }}"
+                     class="photo-thumb"
+                     onerror="this.src='{{ url_for('static', filename='img/no-image.svg') }}'">
+                <div class="photo-overlay">
+                  <span class="photo-name">{{ photo.original_name }}</span>
+                  {% if photo.tags %}
+                  <div class="photo-tags">
+                    {% for tag in photo.tags[:3] %}
+                      <span class="photo-tag">#{{ tag.name }}</span>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+        </div><!-- /.photo-group-grid -->
+      {% else %}
+        <div class="photo-grid" id="photoGrid">
+          {% for photo in photos %}
+          <div class="photo-card" data-id="{{ photo.id }}">
+            <a href="{{ url_for('photo_detail', photo_id=photo.id) }}" class="photo-link">
+              <div class="photo-thumb-wrap">
+                <img src="{{ url_for('static', filename='thumbnails/' + photo.thumbnail_path) }}"
+                     alt="{{ photo.original_name }}"
+                     class="photo-thumb"
+                     onerror="this.src='{{ url_for('static', filename='img/no-image.svg') }}'">
+                <div class="photo-overlay">
+                  <span class="photo-name">{{ photo.original_name }}</span>
+                  {% if photo.tags %}
+                  <div class="photo-tags">
+                    {% for tag in photo.tags[:3] %}
+                      <span class="photo-tag">#{{ tag.name }}</span>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📷</div>
+        <h3>사진이 없습니다</h3>
+        <p>사진을 업로드하여 갤러리를 채워보세요.</p>
+        <a href="{{ url_for('upload') }}" class="btn btn-primary">사진 업로드</a>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

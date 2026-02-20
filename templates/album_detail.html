@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ album.name }} — 사진 정리 앱{% endblock %}
+
+{% block content %}
+<div class="albums-page">
+  <div class="page-header">
+    <div>
+      <a href="{{ url_for('albums') }}" class="btn btn-ghost">← 앨범 목록</a>
+      <h1 class="page-title" style="margin-top: 0.5rem;">{{ album.name }}</h1>
+      {% if album.description %}
+        <p class="text-muted">{{ album.description }}</p>
+      {% endif %}
+      <span class="album-count">{{ album.photos|length }}장의 사진</span>
+    </div>
+    <form action="{{ url_for('delete_album', album_id=album.id) }}" method="post"
+          onsubmit="return confirm('앨범을 삭제하시겠습니까? (사진은 삭제되지 않습니다)')">
+      <button type="submit" class="btn btn-danger">앨범 삭제</button>
+    </form>
+  </div>
+
+  {% if album.photos %}
+  <div class="photo-grid">
+    {% for photo in album.photos %}
+    <div class="photo-card">
+      <a href="{{ url_for('photo_detail', photo_id=photo.id) }}" class="photo-link">
+        <div class="photo-thumb-wrap">
+          <img src="{{ url_for('static', filename='thumbnails/' + photo.thumbnail_path) }}"
+               alt="{{ photo.original_name }}"
+               class="photo-thumb"
+               onerror="this.src='{{ url_for('static', filename='img/no-image.svg') }}'">
+          <div class="photo-overlay">
+            <span class="photo-name">{{ photo.original_name }}</span>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🖼️</div>
+    <h3>앨범이 비어있습니다</h3>
+    <p>사진을 업로드할 때 이 앨범을 선택하세요.</p>
+    <a href="{{ url_for('upload') }}" class="btn btn-primary">사진 업로드</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
