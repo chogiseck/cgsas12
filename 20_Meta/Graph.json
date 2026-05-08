@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "last_updated": "2026-05-08",
+    "total_nodes": 5,
+    "total_edges": 8,
+    "engine": "P-Reinforce v1.0"
+  },
+  "nodes": [
+    {
+      "id": "skill-001-p-reinforce-20260508",
+      "label": "P-Reinforce_Skill",
+      "path": "10_Wiki/🚀 Skills/P-Reinforce_Skill.md",
+      "category": "Skills",
+      "confidence_score": 0.97,
+      "tags": ["autonomous-agent", "knowledge-management", "reinforcement-learning"],
+      "created": "2026-05-08",
+      "last_reinforced": "2026-05-08"
+    },
+    {
+      "id": "proj-001-sand-cheetah-20260508",
+      "label": "Surreal-Athlete-Sand-Cheetah",
+      "path": "10_Wiki/🛠️ Projects/Surreal-Athlete-Sand-Cheetah.md",
+      "category": "Projects",
+      "confidence_score": 0.94,
+      "tags": ["concept-art", "vfx", "sports-advertising", "ai-image-generation"],
+      "created": "2026-05-08",
+      "last_reinforced": "2026-05-08"
+    },
+    {
+      "id": "topic-001-ai-prompt-eng-20260508",
+      "label": "AI-Image-Prompt-Engineering",
+      "path": "10_Wiki/💡 Topics/AI-Image-Prompt-Engineering.md",
+      "category": "Topics",
+      "confidence_score": 0.91,
+      "tags": ["ai-image", "prompt-engineering", "midjourney", "stable-diffusion"],
+      "created": "2026-05-08",
+      "last_reinforced": "2026-05-08"
+    },
+    {
+      "id": "raw-001-scene-json-20260508",
+      "label": "scene.json",
+      "path": "00_Raw/2026-05-08/scene.json",
+      "category": "Raw",
+      "confidence_score": 1.0,
+      "tags": ["raw", "source-of-truth", "concept-art-spec"],
+      "created": "2026-05-08",
+      "last_reinforced": "2026-05-08"
+    },
+    {
+      "id": "raw-002-prompt-gen-20260508",
+      "label": "prompt_generator.py",
+      "path": "00_Raw/2026-05-08/prompt_generator.py",
+      "category": "Raw",
+      "confidence_score": 1.0,
+      "tags": ["raw", "source-of-truth", "python", "prompt-generator"],
+      "created": "2026-05-08",
+      "last_reinforced": "2026-05-08"
+    }
+  ],
+  "edges": [
+    {
+      "source": "proj-001-sand-cheetah-20260508",
+      "target": "topic-001-ai-prompt-eng-20260508",
+      "relation": "uses",
+      "weight": 0.9
+    },
+    {
+      "source": "proj-001-sand-cheetah-20260508",
+      "target": "raw-001-scene-json-20260508",
+      "relation": "derived_from",
+      "weight": 1.0
+    },
+    {
+      "source": "proj-001-sand-cheetah-20260508",
+      "target": "raw-002-prompt-gen-20260508",
+      "relation": "derived_from",
+      "weight": 1.0
+    },
+    {
+      "source": "topic-001-ai-prompt-eng-20260508",
+      "target": "proj-001-sand-cheetah-20260508",
+      "relation": "exemplified_by",
+      "weight": 0.85
+    },
+    {
+      "source": "topic-001-ai-prompt-eng-20260508",
+      "target": "raw-002-prompt-gen-20260508",
+      "relation": "derived_from",
+      "weight": 0.9
+    },
+    {
+      "source": "skill-001-p-reinforce-20260508",
+      "target": "proj-001-sand-cheetah-20260508",
+      "relation": "manages",
+      "weight": 0.7
+    },
+    {
+      "source": "skill-001-p-reinforce-20260508",
+      "target": "topic-001-ai-prompt-eng-20260508",
+      "relation": "manages",
+      "weight": 0.7
+    },
+    {
+      "source": "skill-001-p-reinforce-20260508",
+      "target": "raw-001-scene-json-20260508",
+      "relation": "manages",
+      "weight": 0.6
+    }
+  ],
+  "rl_state": {
+    "w1_categorization_accuracy": 0.45,
+    "w2_graph_connectivity": 0.35,
+    "w3_user_satisfaction": 0.20,
+    "total_reward_history": [],
+    "policy_version": "1.0.0"
+  }
+}

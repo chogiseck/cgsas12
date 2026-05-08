@@ -1,0 +1,140 @@
+name: P-Reinforce Wiki Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "00_Raw/**"
+      - "10_Wiki/**"
+      - "20_Meta/**"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Manual trigger reason"
+        required: false
+        default: "Manual P-Reinforce sync"
+
+jobs:
+  validate-and-index:
+    name: Validate Wiki & Update Index
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Wiki document structure
+        run: |
+          python - <<'EOF'
+          import os, json, re, sys
+
+          errors = []
+          wiki_dir = "10_Wiki"
+          required_sections = ["📌", "📖", "⚠️", "🔗"]
+
+          for root, _, files in os.walk(wiki_dir):
+              for fname in files:
+                  if not fname.endswith(".md"):
+                      continue
+                  path = os.path.join(root, fname)
+                  content = open(path).read()
+                  missing = [s for s in required_sections if s not in content]
+                  if missing:
+                      errors.append(f"{path}: missing sections {missing}")
+                  if "confidence_score" not in content:
+                      errors.append(f"{path}: missing confidence_score in frontmatter")
+
+          if errors:
+              print("❌ Wiki validation failed:")
+              for e in errors:
+                  print(f"  {e}")
+              sys.exit(1)
+          else:
+              print(f"✅ All Wiki documents validated successfully.")
+          EOF
+
+      - name: Count nodes and update Graph stats
+        run: |
+          python - <<'EOF'
+          import os, json
+
+          graph_path = "20_Meta/Graph.json"
+          with open(graph_path) as f:
+              graph = json.load(f)
+
+          wiki_count = sum(
+              1 for root, _, files in os.walk("10_Wiki")
+              for f in files if f.endswith(".md")
+          )
+          raw_count = sum(
+              1 for root, _, files in os.walk("00_Raw")
+              for f in files
+          )
+
+          graph["meta"]["total_nodes"] = wiki_count + raw_count
+          graph["meta"]["last_updated"] = os.popen("date +%Y-%m-%d").read().strip()
+
+          with open(graph_path, "w") as f:
+              json.dump(graph, f, indent=2, ensure_ascii=False)
+
+          print(f"📊 Graph updated: {wiki_count} wiki nodes, {raw_count} raw files")
+          EOF
+
+      - name: Commit updated meta files
+        run: |
+          git config user.name "P-Reinforce Bot"
+          git config user.email "p-reinforce@github-actions"
+          git add 20_Meta/Graph.json
+          if git diff --cached --quiet; then
+            echo "No meta changes to commit."
+          else
+            git commit -m "[P-Reinforce] Auto-update Graph.json node count"
+            git push
+          fi
+
+  confidence-report:
+    name: Confidence Score Report
+    runs-on: ubuntu-latest
+    needs: validate-and-index
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate confidence report
+        run: |
+          python - <<'EOF'
+          import os, re
+
+          print("## 📊 P-Reinforce Confidence Report\n")
+          print(f"{'Document':<45} {'Category':<15} {'Score'}")
+          print("-" * 75)
+
+          scores = []
+          for root, _, files in os.walk("10_Wiki"):
+              for fname in files:
+                  if not fname.endswith(".md"):
+                      continue
+                  path = os.path.join(root, fname)
+                  content = open(path).read()
+                  match = re.search(r"confidence_score:\s*([0-9.]+)", content)
+                  score = float(match.group(1)) if match else 0.0
+                  category = os.path.basename(root)
+                  scores.append(score)
+                  status = "🟢" if score >= 0.90 else "🟡" if score >= 0.75 else "🔴"
+                  print(f"{fname:<45} {category:<15} {status} {score:.2f}")
+
+          if scores:
+              avg = sum(scores) / len(scores)
+              print(f"\n**평균 confidence:** {avg:.3f}")
+              low = [s for s in scores if s < 0.75]
+              if low:
+                  print(f"⚠️  낮은 confidence 문서 {len(low)}개 — Policy 검토 권장")
+          EOF
