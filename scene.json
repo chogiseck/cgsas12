@@ -1,0 +1,92 @@
+{
+  "scene_description": "A surreal, high-octane cinematic concept art piece featuring a male athlete sprinting through a desert, pursued by a colossal, elemental cheetah formed entirely from swirling sand and dust.",
+  "subject": {
+    "type": "male athlete",
+    "age": "late 20s",
+    "features": {
+      "physique": "lean, muscular, runner's build",
+      "skin": "tanned/bronzed, sweat-glistening",
+      "expression": "intense focus, determination, mouth slightly open in exertion"
+    },
+    "attire": "light grey athletic t-shirt with a subtle white logo on the chest, matching athletic shorts, running cap or close-cropped hair",
+    "position": "mid-stride sprinting across a sand dune, leaning forward into the run"
+  },
+  "action": {
+    "primary": "sprinting dynamically across sand dunes",
+    "secondary": "kicking up a trail of dust and sand with every step",
+    "effect": "the motion creates a connection between the runner and the giant sand creature behind him"
+  },
+  "environment": {
+    "setting": "vast, sun-drenched desert dunes under a partly cloudy sky",
+    "foreground_elements": [
+      "flying sand particles",
+      "dune ridges",
+      "motion-blurred dust"
+    ],
+    "background_elements": [
+      "deep blue sky with white cumulus clouds",
+      "rolling sand hills"
+    ]
+  },
+  "visual_description": {
+    "core_subject": "A gigantic, hyper-realistic cheetah head and front paw emerging from a massive sandstorm.",
+    "creature_physics": "The cheetah is not solid; it is a volumetric simulation composed of millions of sand grains, dust, and wind. The edges of the fur dissolve into the sandstorm.",
+    "scale": "The cheetah is kaiju-sized, dwarfing the human runner, symbolizing speed and nature's power."
+  },
+  "lighting": {
+    "style": "High-contrast daylight",
+    "key_light": {
+      "type": "Harsh sun",
+      "direction": "Top-left",
+      "color": "Bright white/Warm daylight",
+      "illuminates": [
+        "the runner's profile",
+        "the textured ridges of the sand-cheetah's face"
+      ]
+    },
+    "shadows": "Deep, sharp shadows casting definition on the sand ripples and the athlete's muscles"
+  },
+  "style": {
+    "medium": "Digital Art / VFX Concept",
+    "aesthetic": "Surrealism, Sports Advertising, Epic Cinematic",
+    "quality": "8k resolution, hyper-detailed particle simulation",
+    "details": "Grainy texture of sand, subsurface scattering in the dust clouds"
+  },
+  "scene_composition": {
+    "subject_action": "Dynamic movement from left to right",
+    "camera_behavior": "Low angle, wide lens to emphasize the massive scale of the sand creature",
+    "depth_layering": "Foreground runner -> Mid-ground Sand Cheetah -> Background Sky"
+  },
+  "lighting_and_atmosphere": {
+    "type": "Desert Day",
+    "specifics": "Atmospheric haze caused by the sandstorm, sun flares peaking through clouds",
+    "color_grade": "Desaturated blues, rich earthy beiges and tans, high contrast"
+  },
+  "attire_customization": {
+    "current_clothing": "Grey athletic t-shirt and shorts",
+    "customizable_clothing": "User can replace with specific sportswear brand kits or colors"
+  },
+  "brand_product_customization": {
+    "current_brand_product": "Generic athletic wear (resembling Nike)",
+    "customizable_brand": "Nike / Adidas / Puma",
+    "customizable_product": "Sportswear collection / Running shoes",
+    "product_placement_area": "Center chest of the t-shirt or the side of the shoes"
+  },
+  "objects_and_props": {
+    "main_objects": [
+      "Runner",
+      "Sand Cheetah Entity"
+    ],
+    "secondary_objects": [
+      "Sand dunes",
+      "Dust clouds"
+    ]
+  },
+  "camera_and_lens": {
+    "focal_length_feel": "24mm Wide Angle",
+    "aperture_effect": "f/8 (deep depth of field to keep both subjects relatively sharp)",
+    "camera_angle": "Low angle, tracking shot",
+    "lens_type": "Cinema Prime",
+    "bokeh_style": "Motion blur on the edges"
+  }
+}
