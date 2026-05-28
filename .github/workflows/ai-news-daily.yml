@@ -1,0 +1,54 @@
+name: 🤖 AI 뉴스 Daily Top10
+
+on:
+  # 매일 한국 시간 오전 8시 (UTC 23:00 전날)
+  schedule:
+    - cron: '0 23 * * *'
+  # 수동 실행도 가능
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-save:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: AI 뉴스 수집 및 저장
+        run: python scripts/fetch_ai_news.py
+
+      - name: 변경사항 커밋 & 푸시
+        run: |
+          git config user.name  "Claude AI 뉴스봇"
+          git config user.email "claude-bot@auto.news"
+
+          DATE=$(date +%Y-%m-%d)
+          FILE="AI뉴스/${DATE}.md"
+
+          if [ ! -f "$FILE" ]; then
+            echo "저장된 파일 없음. 스킵."
+            exit 0
+          fi
+
+          git add "$FILE"
+
+          if git diff --cached --quiet; then
+            echo "변경사항 없음 (오늘 이미 저장됨)."
+            exit 0
+          fi
+
+          git commit -m "feat: AI 뉴스 Top10 자동 저장 (${DATE}) [skip ci]"
+          git push origin HEAD
+          echo "✅ 커밋 & 푸시 완료"
